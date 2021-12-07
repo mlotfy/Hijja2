@@ -1,10 +1,14 @@
-Hija2 ML
-is a python library that uses the Hija2 datasets to train a model and predict results
+# Hijja2 ML
+Arabic Handwritten Charachter Recognition  implemented with TensorFlow (TF) and trained on Hijja2 Images
 
 ![alt text](static/img.png)
 
 
 ![alt text](static/img2.png)
+
+
+## Execute
+python Train.py
 
 # Hijja2
 Hijaa is a dataset for handwritten Arabic letters collected from Arabic-speaking school children between the ages of 7 and 12. Data were collected in Riyadh, Saudi Arabia from January to April, 2019. It represents a total of 47,434 characters written by 591 participants in different forms.
