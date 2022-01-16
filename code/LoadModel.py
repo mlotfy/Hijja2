@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import utility
 import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
@@ -49,7 +49,10 @@ for image_batch, label_batch in testing_batches.take(24):
     plt.xticks([])
     plt.yticks([])
     plt.imshow(first_image, cmap = plt.cm.binary)
-    plt.xlabel(arabic_characters[np.argmax(ps[0])]  +  ' -> ' + arabic_characters[label_batch.numpy().squeeze()[0]])
+    color = 'green' if np.argmax(ps[0]) == label_batch.numpy().squeeze()[0] else 'red'
+    plt.xlabel(arabic_characters[np.argmax(ps[0])], color=color)
+    #plt.xlabel( 'Actual -> ' + arabic_characters[label_batch.numpy().squeeze()[0]])
+    #plt.xlabel(arabic_characters[np.argmax(ps[0])]  +  ' -> ' + arabic_characters[label_batch.numpy().squeeze()[0]])
 plt.show()
 
 

@@ -1,3 +1,4 @@
+
 import pandas as pd
 #!/usr/bin/env python
 
@@ -62,17 +63,30 @@ training_batches = dataset.shuffle(num_training_examples//4).batch(batch_size).m
 testing_batches = dataset_test.shuffle(num_test_examples//4).batch(batch_size).map(normalize).prefetch(1)
 
 ## Solution
-my_model = tf.keras.Sequential([
-           tf.keras.layers.Flatten(input_shape = (32,32,1)),
-           tf.keras.layers.Dense(512, activation = 'relu'),
-           #tf.keras.layers.Dropout(0.4),
-           tf.keras.layers.Dense(128, activation = 'relu'),
-           tf.keras.layers.Dense(64, activation = 'relu'),
-           #tf.keras.layers.Dropout(0.4),
-           tf.keras.layers.Dense(256, activation = 'relu'),
-           tf.keras.layers.Dense(45, activation = 'relu'),
-           tf.keras.layers.Dense(30, activation = 'softmax')
-])
+
+layer_neurons = [2048,1024, 512, 256, 128, 56, 48,36, 72,42]
+#layer_neurons = [1024, 128, 42]
+my_model = tf.keras.Sequential()
+my_model.add(tf.keras.layers.Flatten(input_shape = (32, 32, 1)))
+
+for neurons in layer_neurons:
+    my_model.add(tf.keras.layers.Dense(neurons, activation='relu'))
+    my_model.add(tf.keras.layers.Dropout(0.1))
+            
+my_model.add(tf.keras.layers.Dense(30, activation='softmax'))
+
+
+#my_model = tf.keras.Sequential([
+#           tf.keras.layers.Flatten(input_shape = (32,32,1)),
+#           tf.keras.layers.Dense(512, activation = 'relu'),
+#           #tf.keras.layers.Dropout(0.4),
+#           tf.keras.layers.Dense(128, activation = 'relu'),
+#           tf.keras.layers.Dense(64, activation = 'relu'),
+#           #tf.keras.layers.Dropout(0.4),
+#           tf.keras.layers.Dense(256, activation = 'relu'),
+#           tf.keras.layers.Dense(45, activation = 'relu'),
+#           tf.keras.layers.Dense(30, activation = 'softmax')
+#])
 
 print(my_model.summary())
 my_model.compile(optimizer='adam',
@@ -86,15 +100,28 @@ for image_batch, label_batch in training_batches.take(1):
 print('\nLoss before training: {:,.3f}'.format(loss))
 print('Accuracy before training: {:.3%}'.format(accuracy))
 
-EPOCHS = 200
 
-history = my_model.fit(training_batches, epochs = EPOCHS)
+EPOCHS = 80
+
+early_stop=tf.keras.callbacks.EarlyStopping(
+    monitor='loss', patience=5, 
+ 
+)
+
+
+history = my_model.fit(training_batches, epochs = EPOCHS, callbacks=[early_stop])
 
 for image_batch, label_batch in training_batches.take(1):
     loss, accuracy = my_model.evaluate(image_batch, label_batch)
 
 print('\nLoss after training: {:,.3f}'.format(loss))
 print('Accuracy after training: {:.3%}'.format(accuracy))
+
+for image_batch, label_batch in testing_batches.take(1):
+    loss, accuracy = my_model.evaluate(image_batch, label_batch)
+
+print('\nLoss  Testing: {:,.3f}'.format(loss))
+print('Accuracy  Testing: {:.3%}'.format(accuracy))
 
 plt.figure(figsize=(10,10))
 i=0
@@ -106,7 +133,10 @@ for image_batch, label_batch in testing_batches.take(24):
     plt.xticks([])
     plt.yticks([])
     plt.imshow(first_image, cmap = plt.cm.binary)
-    plt.xlabel(arabic_characters[np.argmax(ps[0])]  +  ' -> ' + arabic_characters[label_batch.numpy().squeeze()[0]])
+    color = 'green' if np.argmax(ps[0]) == label_batch.numpy().squeeze()[0] else 'red'
+    plt.xlabel(arabic_characters[np.argmax(ps[0])], color=color)
+    #plt.title(arabic_characters[np.argmax(ps[0])], color=color)
+    #plt.xlabel( 'Actual -> ' + arabic_characters[label_batch.numpy().squeeze()[0]])
 plt.show()
 
 
@@ -117,7 +147,7 @@ plt.legend(["accuracy","loss"])
 plt.show()
 
 ## Solution
-i=0
+
 for image_batch, label_batch in testing_batches.take(1):
     ps = my_model.predict(image_batch)
     first_image = image_batch.numpy().squeeze()[0]
